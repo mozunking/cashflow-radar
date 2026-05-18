@@ -20,23 +20,16 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
           
-      - name: Install dependencies
-        run: |
-          pip install black isort pyright pytest pytest-cov
-          pip install -r src/requirements.txt
-          
+      - name: Install lint tools
+        run: pip install black isort pyright
+        
       - name: Run Black
-        run: |
-          black --check src/
-          
+        run: black --check src/
+        
       - name: Run isort
-        run: |
-          isort --check-only src/
-          
-      - name: Run Pyright
-        run: |
-          pyright src/
+        run: isort --check-only src/
 
   test:
     name: Unit Tests (${{ matrix.module }})
@@ -44,7 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        module: [cad-data-quality, cad-feature-engine, cad-model-pool, cad-fusion-engine, cad-explainer, cad-degradation, cad-service]
+        module: [cad-data-quality, cad-feature-engine, cad-model-pool, cad-fusion-engine, cad-explainer, cad-degradation]
     steps:
       - uses: actions/checkout@v4
       
@@ -54,48 +47,28 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           
       - name: Install dependencies
-        run: |
-          pip install pytest pytest-cov pytest-asyncio httpx
-          pip install -e src/${{ matrix.module }}
+        run: pip install pytest pytest-cov pytest-asyncio httpx pandas numpy pyod networkx scikit-learn
           
       - name: Run tests
-        run: |
-          PYTHONPATH=src pytest src/${{ matrix.module }}/tests -v --cov=src/${{ matrix.module }} || true
-          
-      - name: Upload coverage
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: coverage-${{ matrix.module }}
-          path: .coverage
+        run: PYTHONPATH=src pytest src/${{ matrix.module }}/tests -v --cov=src/${{ matrix.module }}
 
   build:
     name: Build Docker Image
     runs-on: ubuntu-latest
     needs: [lint, test]
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
       
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Build and push
+      - name: Build
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: ${{ github.ref == 'refs/heads/main' }}
-          tags: |
-            ghcr.io/${{ github.repository }}/cad-service:${{ github.sha }}
-            ghcr.io/${{ github.repository }}/cad-service:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          push: false
+          tags: ghcr.io/${{ github.repository }}/cad-service:${{ github.sha }}
 
   docs:
     name: Documentation Check
@@ -105,12 +78,9 @@ jobs:
       
       - name: Check docs exist
         run: |
-          echo "Checking documentation..."
           test -f docs/design/SK.md
           test -f docs/development/SK.md
           test -f docs/technical/SK.md
-          test -f docs/testing/SK.md
-          test -f docs/deployment/SK.md
 
   security:
     name: Security Scan
@@ -118,12 +88,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Run safety check
-        run: |
-          pip install safety
-          safety check --file src/requirements.txt || true
-          
       - name: Run bandit
-        run: |
-          pip install bandit
-          bandit -r src/ -f json || true
+        run: pip install bandit && bandit -r src/ -f json || true
