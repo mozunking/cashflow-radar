@@ -16,11 +16,15 @@ def show():
     # Filters
     col1, col2, col3 = st.columns([2, 1, 1])
     with col1:
-        search_txn = st.text_input("Search Transaction ID", placeholder="Enter transaction ID...")
+        search_txn = st.text_input(
+            "Search Transaction ID", placeholder="Enter transaction ID..."
+        )
     with col2:
         risk_filter = st.selectbox("Risk Level", ["All", "高风险", "中风险", "低风险"])
     with col3:
-        status_filter = st.selectbox("Status", ["All", "Pending", "Confirmed", "Excluded", "Uncertain"])
+        status_filter = st.selectbox(
+            "Status", ["All", "Pending", "Confirmed", "Excluded", "Uncertain"]
+        )
 
     # Sample review items
     review_items = _get_demo_review_items()
@@ -37,7 +41,16 @@ def show():
             df = df[df["risk_level"] == risk_filter]
 
         st.dataframe(
-            df[["transaction_id", "account_id", "risk_level", "final_score", "anomaly_type", "status"]],
+            df[
+                [
+                    "transaction_id",
+                    "account_id",
+                    "risk_level",
+                    "final_score",
+                    "anomaly_type",
+                    "status",
+                ]
+            ],
             use_container_width=True,
             hide_index=True,
         )
@@ -55,25 +68,32 @@ def show():
             )
 
         # Get selected item details
-        selected = next((item for item in review_items if item["transaction_id"] == selected_txn), None)
+        selected = next(
+            (item for item in review_items if item["transaction_id"] == selected_txn),
+            None,
+        )
 
         if selected:
             with col_right:
-                st.json({
-                    "transaction_id": selected["transaction_id"],
-                    "account_id": selected["account_id"],
-                    "risk_level": selected["risk_level"],
-                    "final_score": selected["final_score"],
-                    "anomaly_type": selected.get("anomaly_type", "TYPE_01"),
-                    "rule_hit": selected.get("rule_hit", False),
-                    "rule_score": selected.get("rule_score", 0.0),
-                })
+                st.json(
+                    {
+                        "transaction_id": selected["transaction_id"],
+                        "account_id": selected["account_id"],
+                        "risk_level": selected["risk_level"],
+                        "final_score": selected["final_score"],
+                        "anomaly_type": selected.get("anomaly_type", "TYPE_01"),
+                        "rule_hit": selected.get("rule_hit", False),
+                        "rule_score": selected.get("rule_score", 0.0),
+                    }
+                )
 
                 # Explanation section
                 st.markdown("**Anomaly Explanation**")
                 with st.expander("View SHAP Explanation"):
                     st.info("Feature contribution analysis would appear here")
-                    st.write("- amt_deviation: 0.42 contribution (3.8 vs 0.45 historical mean)")
+                    st.write(
+                        "- amt_deviation: 0.42 contribution (3.8 vs 0.45 historical mean)"
+                    )
                     st.write("- velocity_score: 0.28 contribution")
                     st.write("- balance_ratio: 0.15 contribution")
 
@@ -101,16 +121,24 @@ def show():
             with col2:
                 st.write("### Quick Actions")
                 if st.button("✅ Confirm (确认)", use_container_width=True):
-                    _submit_feedback(API_BASE, selected_txn, "确认", comment, anomaly_type)
+                    _submit_feedback(
+                        API_BASE, selected_txn, "确认", comment, anomaly_type
+                    )
                 if st.button("❌ Exclude (排除)", use_container_width=True):
-                    _submit_feedback(API_BASE, selected_txn, "排除", comment, anomaly_type)
+                    _submit_feedback(
+                        API_BASE, selected_txn, "排除", comment, anomaly_type
+                    )
                 if st.button("❓ Mark Uncertain (存疑)", use_container_width=True):
-                    _submit_feedback(API_BASE, selected_txn, "存疑", comment, anomaly_type)
+                    _submit_feedback(
+                        API_BASE, selected_txn, "存疑", comment, anomaly_type
+                    )
     else:
         st.info("No items in review queue")
 
 
-def _submit_feedback(api_base: str, transaction_id: str, result: str, comment: str, anomaly_type: str):
+def _submit_feedback(
+    api_base: str, transaction_id: str, result: str, comment: str, anomaly_type: str
+):
     """Submit feedback for a transaction."""
     try:
         response = requests.post(
@@ -139,7 +167,9 @@ def _get_demo_review_items():
         {
             "transaction_id": f"TXN{i:06d}",
             "account_id": f"ACC{i % 10:04d}",
-            "risk_level": "高风险" if i % 5 == 0 else "中风险" if i % 5 < 3 else "低风险",
+            "risk_level": (
+                "高风险" if i % 5 == 0 else "中风险" if i % 5 < 3 else "低风险"
+            ),
             "final_score": 75.0 + (i % 25),
             "anomaly_type": f"TYPE_0{i % 4 + 1}",
             "status": "Pending",

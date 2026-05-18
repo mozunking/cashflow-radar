@@ -11,7 +11,9 @@ def show():
     st.markdown("System configuration and user preferences")
 
     # Tab layout
-    tab1, tab2, tab3, tab4 = st.tabs(["🔐 API Configuration", "👥 User Management", "📊 Preferences", "ℹ️ About"])
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["🔐 API Configuration", "👥 User Management", "📊 Preferences", "ℹ️ About"]
+    )
 
     with tab1:
         _render_api_config()
@@ -57,17 +59,41 @@ def _render_api_config():
     # API Documentation
     st.subheader("API Endpoints")
     endpoints = [
-        {"method": "POST", "path": "/api/v1/detect/batch", "description": "Run batch anomaly detection"},
-        {"method": "GET", "path": "/api/v1/explain/{transaction_id}", "description": "Get anomaly explanation"},
-        {"method": "POST", "path": "/api/v1/feedback", "description": "Submit review feedback"},
-        {"method": "GET", "path": "/api/v1/models", "description": "List available models"},
-        {"method": "GET", "path": "/api/v1/health/degradation", "description": "Check degradation status"},
+        {
+            "method": "POST",
+            "path": "/api/v1/detect/batch",
+            "description": "Run batch anomaly detection",
+        },
+        {
+            "method": "GET",
+            "path": "/api/v1/explain/{transaction_id}",
+            "description": "Get anomaly explanation",
+        },
+        {
+            "method": "POST",
+            "path": "/api/v1/feedback",
+            "description": "Submit review feedback",
+        },
+        {
+            "method": "GET",
+            "path": "/api/v1/models",
+            "description": "List available models",
+        },
+        {
+            "method": "GET",
+            "path": "/api/v1/health/degradation",
+            "description": "Check degradation status",
+        },
     ]
 
     for ep in endpoints:
         col1, col2, col3 = st.columns([1, 3, 4])
         with col1:
-            method_color = "green" if ep["method"] == "GET" else "blue" if ep["method"] == "POST" else "orange"
+            method_color = (
+                "green"
+                if ep["method"] == "GET"
+                else "blue" if ep["method"] == "POST" else "orange"
+            )
             st.markdown(f":{method_color}[{ep['method']}]")
         with col2:
             st.code(ep["path"], language=None)
@@ -80,7 +106,9 @@ def _render_api_config():
     st.subheader("Rate Limiting")
     col1, col2 = st.columns(2)
     with col1:
-        st.number_input("Max Requests per Minute", value=60, min_value=1, max_value=1000)
+        st.number_input(
+            "Max Requests per Minute", value=60, min_value=1, max_value=1000
+        )
         st.number_input("Timeout (seconds)", value=30, min_value=5, max_value=300)
     with col2:
         st.toggle("Enable Retry on Failure")
@@ -106,8 +134,14 @@ def _render_user_management():
     # User roles
     st.subheader("Role Permissions")
     roles = [
-        {"role": "admin", "permissions": ["Full access", "User management", "Deploy models"]},
-        {"role": "supervisor", "permissions": ["View dashboard", "Submit feedback", "View models"]},
+        {
+            "role": "admin",
+            "permissions": ["Full access", "User management", "Deploy models"],
+        },
+        {
+            "role": "supervisor",
+            "permissions": ["View dashboard", "Submit feedback", "View models"],
+        },
         {"role": "analyst", "permissions": ["View dashboard", "Submit feedback"]},
         {"role": "viewer", "permissions": ["View dashboard only"]},
     ]
@@ -115,16 +149,30 @@ def _render_user_management():
     for role in roles:
         with st.expander(f"Role: {role['role']}"):
             for perm in role["permissions"]:
-                st.checkbox(perm, value=True, disabled=True, key=f"perm_{role['role']}_{perm}")
+                st.checkbox(
+                    perm, value=True, disabled=True, key=f"perm_{role['role']}_{perm}"
+                )
 
     st.divider()
 
     # Team management
     st.subheader("Team Management")
     teams = [
-        {"name": "fraud_detection", "members": 5, "description": "Fraud detection team"},
-        {"name": "risk_management", "members": 3, "description": "Risk management team"},
-        {"name": "compliance", "members": 2, "description": "Compliance monitoring team"},
+        {
+            "name": "fraud_detection",
+            "members": 5,
+            "description": "Fraud detection team",
+        },
+        {
+            "name": "risk_management",
+            "members": 3,
+            "description": "Risk management team",
+        },
+        {
+            "name": "compliance",
+            "members": 2,
+            "description": "Compliance monitoring team",
+        },
     ]
 
     for team in teams:

@@ -1,4 +1,5 @@
 """Tests for FusionEngine"""
+
 import pytest
 from cad_fusion_engine.engine import FusionEngine, FusionOutput
 
@@ -40,10 +41,7 @@ class TestFusionEngine:
         assert result.final_score >= 80
 
     def test_custom_weights(self):
-        engine = FusionEngine(
-            phase="gray",
-            custom_algo_w={"iforest": 1.0}
-        )
+        engine = FusionEngine(phase="gray", custom_algo_w={"iforest": 1.0})
         scores = {"iforest": 100.0}
         score = engine.algo_score(scores)
         assert score == 100.0

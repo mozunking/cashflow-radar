@@ -123,7 +123,9 @@ class ExplainerEngine:
             anomaly_type=anomaly_type,
             anomaly_type_desc=ANOMALY_TYPE_MAP.get(anomaly_type, "未知类型"),
             top_features=top_features,
-            explain_method=f"shap_{self.model_name}" if self.model_name == "iforest" else "lime",
+            explain_method=(
+                f"shap_{self.model_name}" if self.model_name == "iforest" else "lime"
+            ),
             explain_time_ms=0.0,
         )
 

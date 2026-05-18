@@ -1,4 +1,5 @@
 """JWT Authentication for CAD Service - Production SM2 Implementation"""
+
 import os
 from datetime import datetime, timedelta
 from typing import Annotated
@@ -9,7 +10,9 @@ from pydantic import BaseModel, field_validator
 from gmssl import sm2, sm3
 
 JWTConfig = {
-    "SM2_PUBLIC_KEY_FILE": os.getenv("JWT_SM2_PUBLIC_KEY_FILE", "/secrets/jwt-public.key"),
+    "SM2_PUBLIC_KEY_FILE": os.getenv(
+        "JWT_SM2_PUBLIC_KEY_FILE", "/secrets/jwt-public.key"
+    ),
     "JWT_EXPIRY_MINUTES": int(os.getenv("JWT_EXPIRY_MINUTES", "15")),
     "ISSUER": "cad-service",
 }
@@ -40,6 +43,7 @@ def _load_sm2_public_key() -> bytes:
 
 def _base64url_decode(data: str) -> bytes:
     import base64
+
     pad = "=" * (4 - len(data) % 4) if len(data) % 4 else ""
     return base64.urlsafe_b64decode(data + pad)
 
@@ -54,7 +58,9 @@ def _verify_sm2_signature(message: str, signature: str, public_key: bytes) -> bo
         return False
 
 
-def verify_jwt(credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)]) -> AuthenticatedUser:
+def verify_jwt(
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)],
+) -> AuthenticatedUser:
     if credentials is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -73,6 +79,7 @@ def verify_jwt(credentials: Annotated[HTTPAuthorizationCredentials, Depends(bear
 
         payload_json = _base64url_decode(payload_b64).decode()
         import json
+
         claims = json.loads(payload_json)
 
         exp_ts = claims.get("exp", 0)
@@ -86,10 +93,13 @@ def verify_jwt(credentials: Annotated[HTTPAuthorizationCredentials, Depends(bear
             public_key = _load_sm2_public_key()
         except FileNotFoundError:
             import hmac, hashlib
+
             if not hmac.compare_digest(token, os.getenv("DEV_TOKEN", "")):
                 raise HTTPException(status_code=401, detail="Invalid token")
 
-        return AuthenticatedUser(user_id=claims["sub"], role=claims.get("role", "analyst"))
+        return AuthenticatedUser(
+            user_id=claims["sub"], role=claims.get("role", "analyst")
+        )
 
     except HTTPException:
         raise
@@ -102,14 +112,21 @@ def verify_jwt(credentials: Annotated[HTTPAuthorizationCredentials, Depends(bear
 
 
 def require_role(*allowed_roles: str):
-    def role_checker(user: Annotated[AuthenticatedUser, Depends(verify_jwt)]) -> AuthenticatedUser:
+    def role_checker(
+        user: Annotated[AuthenticatedUser, Depends(verify_jwt)],
+    ) -> AuthenticatedUser:
         if user.role not in allowed_roles:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Access denied")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail=f"Access denied"
+            )
         return user
+
     return role_checker
 
 
-def optional_auth(credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)]) -> AuthenticatedUser | None:
+def optional_auth(
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)],
+) -> AuthenticatedUser | None:
     if credentials is None:
         return None
     try:

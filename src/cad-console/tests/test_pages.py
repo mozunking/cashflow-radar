@@ -1,6 +1,7 @@
 """Tests for CAD Console pages."""
 
 import sys
+
 sys.path.insert(0, "/Users/hfy/cashflow-radar/src")
 
 from datetime import datetime, timedelta
@@ -12,6 +13,7 @@ class TestDashboardPage:
     def test_demo_data_generation(self):
         """Test demo data structure."""
         from pages.dashboard import _get_demo_data
+
         data = _get_demo_data()
         assert "task_id" in data
         assert "total_count" in data
@@ -24,6 +26,7 @@ class TestDashboardPage:
     def test_risk_level_distribution(self):
         """Test risk level counts sum to total."""
         from pages.dashboard import _get_demo_data
+
         data = _get_demo_data()
         total = data["high_risk"] + data["medium_risk"] + data["low_risk"]
         assert total == data["total_count"]
@@ -35,6 +38,7 @@ class TestReviewPage:
     def test_review_items_generation(self):
         """Test review items structure."""
         from pages.review import _get_demo_review_items
+
         items = _get_demo_review_items()
         assert len(items) > 0
         assert "transaction_id" in items[0]
@@ -43,8 +47,11 @@ class TestReviewPage:
     def test_feedback_submission(self):
         """Test feedback submission with demo mode."""
         from pages.review import _submit_feedback
+
         # Should not raise, demo mode returns success
-        _submit_feedback("http://localhost:8080", "TXN001", "确认", "Test comment", "TYPE_01")
+        _submit_feedback(
+            "http://localhost:8080", "TXN001", "确认", "Test comment", "TYPE_01"
+        )
 
 
 class TestDeploymentPage:
@@ -67,6 +74,7 @@ class TestSettingsPage:
         """Test API endpoints list is defined."""
         # Import via module inspection
         from pages.settings import _render_api_config
+
         assert callable(_render_api_config)
 
 

@@ -18,11 +18,7 @@ class DataQualityResult:
     action: str  # "proceed" or "block_and_alert"
 
     def to_dict(self) -> dict:
-        return {
-            "passed": self.passed,
-            "results": self.results,
-            "action": self.action
-        }
+        return {"passed": self.passed, "results": self.results, "action": self.action}
 
 
 class DataQualityChecker:
@@ -39,24 +35,28 @@ class DataQualityChecker:
         ok = True
         for col in required:
             if col not in df.columns:
-                self.results.append({
-                    "cat": "completeness",
-                    "field": col,
-                    "rate": 1.0,
-                    "ok": False,
-                    "msg": "字段不存在"
-                })
+                self.results.append(
+                    {
+                        "cat": "completeness",
+                        "field": col,
+                        "rate": 1.0,
+                        "ok": False,
+                        "msg": "字段不存在",
+                    }
+                )
                 ok = False
                 continue
             rate = df[col].isnull().sum() / len(df)
             if rate > threshold:
                 ok = False
-                self.results.append({
-                    "cat": "completeness",
-                    "field": col,
-                    "rate": round(rate, 4),
-                    "ok": False
-                })
+                self.results.append(
+                    {
+                        "cat": "completeness",
+                        "field": col,
+                        "rate": round(rate, 4),
+                        "ok": False,
+                    }
+                )
         return ok
 
     def check_timeliness(
@@ -69,12 +69,14 @@ class DataQualityChecker:
         expected = pd.Timestamp(datetime.now().date() - timedelta(days=1))
         ok = max_dt >= expected
         if not ok:
-            self.results.append({
-                "cat": "timeliness",
-                "max": str(max_dt),
-                "expected": str(expected),
-                "ok": False
-            })
+            self.results.append(
+                {
+                    "cat": "timeliness",
+                    "max": str(max_dt),
+                    "expected": str(expected),
+                    "ok": False,
+                }
+            )
         return ok
 
     def check_record_count(self, df: pd.DataFrame) -> bool:
@@ -85,13 +87,15 @@ class DataQualityChecker:
         dev = abs(len(df) - avg) / avg
         ok = dev <= 0.3
         if not ok:
-            self.results.append({
-                "cat": "record_count",
-                "count": len(df),
-                "avg": avg,
-                "deviation": round(dev, 4),
-                "ok": False
-            })
+            self.results.append(
+                {
+                    "cat": "record_count",
+                    "count": len(df),
+                    "avg": avg,
+                    "deviation": round(dev, 4),
+                    "ok": False,
+                }
+            )
         return ok
 
     def check_consistency(self, df: pd.DataFrame) -> bool:
@@ -100,22 +104,26 @@ class DataQualityChecker:
         if "balance" in df.columns:
             neg_balance = (df["balance"] < 0).sum()
             if neg_balance > 0:
-                self.results.append({
-                    "cat": "consistency",
-                    "field": "balance",
-                    "negative_count": int(neg_balance),
-                    "ok": False
-                })
+                self.results.append(
+                    {
+                        "cat": "consistency",
+                        "field": "balance",
+                        "negative_count": int(neg_balance),
+                        "ok": False,
+                    }
+                )
                 ok = False
         if "amount" in df.columns:
             invalid_amt = (df["amount"] <= 0).sum()
             if invalid_amt > 0:
-                self.results.append({
-                    "cat": "consistency",
-                    "field": "amount",
-                    "invalid_count": int(invalid_amt),
-                    "ok": False
-                })
+                self.results.append(
+                    {
+                        "cat": "consistency",
+                        "field": "amount",
+                        "invalid_count": int(invalid_amt),
+                        "ok": False,
+                    }
+                )
                 ok = False
         return ok
 
@@ -132,12 +140,14 @@ class DataQualityChecker:
             current_mean = df[col].mean()
             drift = abs(current_mean - hist_mean) / max(hist_std, 1e-6)
             if drift > 2:
-                self.results.append({
-                    "cat": "distribution",
-                    "field": col,
-                    "drift_sigma": round(drift, 2),
-                    "ok": False
-                })
+                self.results.append(
+                    {
+                        "cat": "distribution",
+                        "field": col,
+                        "drift_sigma": round(drift, 2),
+                        "ok": False,
+                    }
+                )
                 ok = False
         return ok
 
@@ -156,8 +166,4 @@ class DataQualityChecker:
         overall = c1 and c2 and c3 and c4 and c5
         action = "proceed" if overall else "block_and_alert"
 
-        return DataQualityResult(
-            passed=overall,
-            results=self.results,
-            action=action
-        )
+        return DataQualityResult(passed=overall, results=self.results, action=action)

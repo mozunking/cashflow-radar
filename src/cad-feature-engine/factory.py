@@ -46,7 +46,7 @@ class FeatureFactory:
                 feature_version=self.version,
                 computed_at=datetime.now(),
                 quality_passed=False,
-                quality_details=["empty dataframe"]
+                quality_details=["empty dataframe"],
             )
 
         txn_id = str(df.iloc[0].get("transaction_id", ""))
@@ -66,7 +66,7 @@ class FeatureFactory:
             feature_version=self.version,
             computed_at=datetime.now(),
             quality_passed=True,
-            quality_details=self.details if self.details else None
+            quality_details=self.details if self.details else None,
         )
 
     def _amount_features(self, df: pd.DataFrame) -> dict[str, float]:
@@ -83,15 +83,19 @@ class FeatureFactory:
         features["amt_industry_dev"] = float((amt.mean() - mean_val) / mean_val)
 
         # amt_threshold_proximity: 大额交易标准接近度
-        features["amt_threshold_proximity"] = float(max(
-            1 - abs(amt.mean() - 500000) / 500000,
-            1 - abs(amt.mean() - 2000000) / 2000000
-        ))
+        features["amt_threshold_proximity"] = float(
+            max(
+                1 - abs(amt.mean() - 500000) / 500000,
+                1 - abs(amt.mean() - 2000000) / 2000000,
+            )
+        )
 
         # amt_tail_pattern: 金额尾数特征
         last_digit = int(str(int(amt.mean()))[-1])
-        features["amt_tail_pattern"] = 1.0 if last_digit == 0 else (
-            0.5 if len(set(str(int(amt.mean())))) == 1 else 0.0
+        features["amt_tail_pattern"] = (
+            1.0
+            if last_digit == 0
+            else (0.5 if len(set(str(int(amt.mean())))) == 1 else 0.0)
         )
 
         # amt_daily_total: 单日累计金额
@@ -125,9 +129,9 @@ class FeatureFactory:
 
         # freq_same_counterparty: 相同对手交易频率
         if "payee_id" in df.columns:
-            features["freq_same_counterparty"] = float(
-                df["payee_id"].value_counts().max()
-            ) if len(df) > 0 else 0.0
+            features["freq_same_counterparty"] = (
+                float(df["payee_id"].value_counts().max()) if len(df) > 0 else 0.0
+            )
         else:
             features["freq_same_counterparty"] = 0.0
 
@@ -183,7 +187,9 @@ class FeatureFactory:
         if "balance" in df.columns:
             bal = df["balance"].astype(float)
             features["acct_balance_change"] = float(
-                (bal.iloc[-1] - bal.iloc[0]) / abs(bal.iloc[0]) if bal.iloc[0] != 0 else 0.0
+                (bal.iloc[-1] - bal.iloc[0]) / abs(bal.iloc[0])
+                if bal.iloc[0] != 0
+                else 0.0
             )
         else:
             features["acct_balance_change"] = 0.0
@@ -211,7 +217,9 @@ class FeatureFactory:
 
         return features
 
-    def _interaction_features(self, base_features: dict[str, float]) -> dict[str, float]:
+    def _interaction_features(
+        self, base_features: dict[str, float]
+    ) -> dict[str, float]:
         """交互特征（8个）"""
         features = {}
 
@@ -243,7 +251,9 @@ class FeatureFactory:
         features["ix_volatility_cp_change"] = float(amt_vol * cp_change)
 
         # ix_amt_cross_border: 大额跨境交易标识
-        features["ix_amt_cross_border"] = 1.0 if amt_dev > 1.5 and acct_cross > 0 else 0.0
+        features["ix_amt_cross_border"] = (
+            1.0 if amt_dev > 1.5 and acct_cross > 0 else 0.0
+        )
 
         # ix_related_freq: 关联企业高频交易系数
         features["ix_related_freq"] = float(cp_related * freq_counter)

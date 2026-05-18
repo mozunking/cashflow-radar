@@ -1,4 +1,5 @@
 """Tests for CAD API"""
+
 import pytest
 from httpx import AsyncClient, ASGITransport
 from cad_service.main import app
@@ -20,8 +21,7 @@ async def test_batch_detect():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.post(
-            "/api/v1/detect/batch",
-            json={"data_date": "2026-05-17"}
+            "/api/v1/detect/batch", json={"data_date": "2026-05-17"}
         )
         assert response.status_code == 200
         data = response.json()

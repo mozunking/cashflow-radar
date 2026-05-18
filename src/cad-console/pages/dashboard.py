@@ -7,6 +7,7 @@ import pandas as pd
 import requests
 from datetime import datetime, timedelta
 import sys
+
 sys.path.insert(0, "/Users/hfy/cashflow-radar/src")
 from cad_service.models import BatchDetectResponse
 
@@ -49,13 +50,18 @@ def show():
                 try:
                     response = requests.post(
                         f"{API_BASE}/detect/batch",
-                        json={"data_date": data_date.strftime("%Y-%m-%d"), "feature_version": feature_version},
+                        json={
+                            "data_date": data_date.strftime("%Y-%m-%d"),
+                            "feature_version": feature_version,
+                        },
                         timeout=30,
                     )
                     if response.status_code == 200:
                         result = response.json()
                         st.session_state["detection_result"] = result
-                        st.success(f"Detection completed! Task ID: {result.get('task_id', 'N/A')}")
+                        st.success(
+                            f"Detection completed! Task ID: {result.get('task_id', 'N/A')}"
+                        )
                     else:
                         st.error(f"API error: {response.status_code}")
                 except requests.exceptions.ConnectionError:
@@ -120,7 +126,11 @@ def _render_risk_distribution(result: dict):
         values="Count",
         names="Risk Level",
         color="Risk Level",
-        color_discrete_map={"高风险": "#ff4b4b", "中风险": "#ffa500", "低风险": "#00cc96"},
+        color_discrete_map={
+            "高风险": "#ff4b4b",
+            "中风险": "#ffa500",
+            "低风险": "#00cc96",
+        },
         hole=0.4,
     )
     fig.update_layout(height=300, margin=dict(l=20, r=20, t=20, b=20))
@@ -135,8 +145,22 @@ def _render_transaction_list(result: dict):
         return
 
     df = pd.DataFrame(transactions)
-    display_df = df[["transaction_id", "account_id", "amount" if "amount" in df.columns else "final_score", "risk_level", "final_score"]].copy()
-    display_df.columns = ["Transaction ID", "Account ID", "Amount/Score", "Risk Level", "Final Score"]
+    display_df = df[
+        [
+            "transaction_id",
+            "account_id",
+            "amount" if "amount" in df.columns else "final_score",
+            "risk_level",
+            "final_score",
+        ]
+    ].copy()
+    display_df.columns = [
+        "Transaction ID",
+        "Account ID",
+        "Amount/Score",
+        "Risk Level",
+        "Final Score",
+    ]
 
     st.dataframe(display_df, use_container_width=True, hide_index=True, height=250)
 
@@ -151,7 +175,9 @@ def _render_model_status():
     df = pd.DataFrame(models)
 
     def status_color(s):
-        color = "#00cc96" if s == "active" else "#ff4b4b" if s == "inactive" else "#ffa500"
+        color = (
+            "#00cc96" if s == "active" else "#ff4b4b" if s == "inactive" else "#ffa500"
+        )
         return f":{color}[{s}]"
 
     col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
@@ -199,7 +225,9 @@ def _get_demo_data() -> dict:
                 "rule_score": 85.0 if i % 5 == 0 else 0.0,
                 "algo_score": 72.5,
                 "final_score": 75.0 + (i % 20),
-                "risk_level": "高风险" if i % 10 < 3 else "中风险" if i % 10 < 6 else "低风险",
+                "risk_level": (
+                    "高风险" if i % 10 < 3 else "中风险" if i % 10 < 6 else "低风险"
+                ),
                 "anomaly_type": "TYPE_01",
                 "model_scores": {"iforest": 0.8, "lof": 0.75, "graph": 0.72},
             }

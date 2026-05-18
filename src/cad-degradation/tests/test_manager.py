@@ -1,4 +1,5 @@
 """Tests for DegradationManager"""
+
 import pytest
 from cad_degradation.manager import DegradationManager
 

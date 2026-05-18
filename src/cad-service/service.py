@@ -1,4 +1,5 @@
 """CAD Service Business Logic"""
+
 import uuid
 from datetime import datetime
 from typing import Any
@@ -28,11 +29,13 @@ class CADService:
     def _ensure_initialized(self):
         if not self._initialized:
             # 模拟加载模型（实际从MinIO/MLflow加载）
-            sample_data = pd.DataFrame({
-                "f1": [0.1] * 10,
-                "f2": [0.2] * 10,
-                "f3": [0.3] * 10,
-            })
+            sample_data = pd.DataFrame(
+                {
+                    "f1": [0.1] * 10,
+                    "f2": [0.2] * 10,
+                    "f3": [0.3] * 10,
+                }
+            )
             self.model_pool.fit(sample_data)
             self._initialized = True
 
@@ -43,12 +46,14 @@ class CADService:
         self._ensure_initialized()
 
         # 模拟数据
-        df = pd.DataFrame({
-            "transaction_id": [f"TXN{i:06d}" for i in range(100)],
-            "account_id": [f"ACC{i % 10:04d}" for i in range(100)],
-            "amount": [10000.0 + i * 100 for i in range(100)],
-            "balance": [100000.0] * 100,
-        })
+        df = pd.DataFrame(
+            {
+                "transaction_id": [f"TXN{i:06d}" for i in range(100)],
+                "account_id": [f"ACC{i % 10:04d}" for i in range(100)],
+                "amount": [10000.0 + i * 100 for i in range(100)],
+                "balance": [100000.0] * 100,
+            }
+        )
 
         # 质量校验
         quality_result = self.checker.run_all(df, ["transaction_id", "amount"])
@@ -74,17 +79,19 @@ class CADService:
                 transaction_id=txn_id,
             )
 
-            results.append({
-                "transaction_id": txn_id,
-                "account_id": df.iloc[i]["account_id"],
-                "rule_hit": rule_hit,
-                "rule_score": rule_score,
-                "algo_score": fusion_result.algo_score,
-                "final_score": fusion_result.final_score,
-                "risk_level": fusion_result.risk_level,
-                "anomaly_type": "TYPE_01",
-                "model_scores": score_dict,
-            })
+            results.append(
+                {
+                    "transaction_id": txn_id,
+                    "account_id": df.iloc[i]["account_id"],
+                    "rule_hit": rule_hit,
+                    "rule_score": rule_score,
+                    "algo_score": fusion_result.algo_score,
+                    "final_score": fusion_result.final_score,
+                    "risk_level": fusion_result.risk_level,
+                    "anomaly_type": "TYPE_01",
+                    "model_scores": score_dict,
+                }
+            )
 
         # 统计
         high_risk = sum(1 for r in results if r["risk_level"] == "高风险")
@@ -135,9 +142,24 @@ class CADService:
     def get_models(self) -> list[dict]:
         """获取模型列表"""
         return [
-            {"name": "iforest", "version": "1.0.0", "status": "active", "metrics": {"f1": 0.82}},
-            {"name": "lof", "version": "1.0.0", "status": "active", "metrics": {"f1": 0.76}},
-            {"name": "graph", "version": "1.0.0", "status": "active", "metrics": {"f1": 0.74}},
+            {
+                "name": "iforest",
+                "version": "1.0.0",
+                "status": "active",
+                "metrics": {"f1": 0.82},
+            },
+            {
+                "name": "lof",
+                "version": "1.0.0",
+                "status": "active",
+                "metrics": {"f1": 0.76},
+            },
+            {
+                "name": "graph",
+                "version": "1.0.0",
+                "status": "active",
+                "metrics": {"f1": 0.74},
+            },
         ]
 
     def get_degradation_status(self) -> dict:

@@ -1,4 +1,5 @@
 """Tests for DataQualityChecker"""
+
 import pandas as pd
 import pytest
 from datetime import datetime, timedelta
@@ -34,22 +35,26 @@ class TestDataQualityChecker:
 
     def test_run_all_pass(self):
         yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
-        df = pd.DataFrame({
-            "transaction_date": [yesterday] * 100,
-            "txn_id": range(100),
-            "amount": [100.0] * 100,
-            "balance": [1000.0] * 100,
-        })
+        df = pd.DataFrame(
+            {
+                "transaction_date": [yesterday] * 100,
+                "txn_id": range(100),
+                "amount": [100.0] * 100,
+                "balance": [1000.0] * 100,
+            }
+        )
         checker = DataQualityChecker({"avg_record_count": 100})
         result = checker.run_all(df, ["txn_id", "amount"], ["amount"])
         assert result.passed is True
         assert result.action == "proceed"
 
     def test_run_all_fail(self):
-        df = pd.DataFrame({
-            "txn_id": range(100),
-            "amount": [None] * 50 + [100.0] * 50,
-        })
+        df = pd.DataFrame(
+            {
+                "txn_id": range(100),
+                "amount": [None] * 50 + [100.0] * 50,
+            }
+        )
         checker = DataQualityChecker()
         result = checker.run_all(df, ["txn_id", "amount"])
         assert result.passed is False

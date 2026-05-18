@@ -1,4 +1,5 @@
 """CAD API Routes"""
+
 import os
 from datetime import datetime
 from typing import Annotated
@@ -18,7 +19,6 @@ from .models import (
 )
 from .service import CADService
 
-
 router = APIRouter()
 
 RATE_LIMIT = os.getenv("RATE_LIMIT", "100/minute")
@@ -31,6 +31,7 @@ def get_cad_service() -> CADService:
 def rate_limit(request: Request):
     """Rate limit decorator helper"""
     from main import limiter
+
     return limiter.limit(RATE_LIMIT)(request)
 
 
@@ -44,10 +45,11 @@ async def batch_detect(
     """批量检测接口"""
     try:
         from main import limiter
+
         limiter.limit(RATE_LIMIT)(request)
     except Exception:
         pass
-    
+
     try:
         result = await service.batch_detect(
             data_date=batch_request.data_date,
@@ -70,10 +72,11 @@ async def explain_transaction(
     """获取异常解释"""
     try:
         from main import limiter
+
         limiter.limit(RATE_LIMIT)(request)
     except Exception:
         pass
-    
+
     result = await service.get_explanation(transaction_id)
     if result is None:
         raise HTTPException(status_code=404, detail="交易不存在")
@@ -90,10 +93,11 @@ async def submit_feedback(
     """提交复核反馈"""
     try:
         from main import limiter
+
         limiter.limit(RATE_LIMIT)(request)
     except Exception:
         pass
-    
+
     result = await service.submit_feedback(feedback)
     return result
 
@@ -107,10 +111,11 @@ async def list_models(
     """获取模型列表"""
     try:
         from main import limiter
+
         limiter.limit(RATE_LIMIT)(request)
     except Exception:
         pass
-    
+
     return service.get_models()
 
 
@@ -123,8 +128,9 @@ async def degradation_status(
     """获取降级状态"""
     try:
         from main import limiter
+
         limiter.limit(RATE_LIMIT)(request)
     except Exception:
         pass
-    
+
     return service.get_degradation_status()

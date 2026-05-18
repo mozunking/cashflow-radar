@@ -1,4 +1,5 @@
 """Tests for ExplainerEngine"""
+
 import pytest
 from cad_explainer.explainer import ExplainerEngine, ANOMALY_TYPE_MAP
 
@@ -26,7 +27,14 @@ class TestExplainerEngine:
         # Amount feature dominant -> TYPE_01
         features = {"amt_deviation": 5.0}
         atype = engine._classify_anomaly(features)
-        assert atype in ["TYPE_01", "TYPE_02", "TYPE_03", "TYPE_04", "TYPE_05", "TYPE_06"]
+        assert atype in [
+            "TYPE_01",
+            "TYPE_02",
+            "TYPE_03",
+            "TYPE_04",
+            "TYPE_05",
+            "TYPE_06",
+        ]
 
     def test_feature_business_description(self):
         engine = ExplainerEngine()

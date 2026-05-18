@@ -1,4 +1,5 @@
 """CAD Pydantic Models"""
+
 from datetime import datetime
 from typing import Any
 

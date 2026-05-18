@@ -97,7 +97,5 @@ class FusionEngine:
         return {
             "phase": self.phase,
             "algo_weights": self.algo_w,
-            "phase_weights": {
-                k: f"{v[0]}/{v[1]}" for k, v in self.phase_w.items()
-            },
+            "phase_weights": {k: f"{v[0]}/{v[1]}" for k, v in self.phase_w.items()},
         }

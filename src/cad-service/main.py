@@ -2,6 +2,7 @@
 
 资金异常检测API服务
 """
+
 from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Any
@@ -71,4 +72,5 @@ async def http_exception_handler(request, exc: HTTPException):
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -36,14 +36,14 @@ class ModelPool:
             max_samples="auto",
             contamination=contamination,
             random_state=42,
-            n_jobs=-1
+            n_jobs=-1,
         )
         self.lof = LOF(
             n_neighbors=20,
             algorithm="auto",
             metric="minkowski",
             contamination=contamination,
-            n_jobs=-1
+            n_jobs=-1,
         )
         self.graph_detector: Any = None
         self._fitted = False
@@ -91,27 +91,31 @@ class ModelPool:
                 anomaly_flag = bool(self.lof.predict(pred_input)[0])
             else:
                 anomaly_flag = False
-            results.append(ModelOutput(
-                model_name=name,
-                model_version="1.0.0",
-                anomaly_score=score,
-                anomaly_flag=anomaly_flag,
-                contamination=self.contamination,
-                inference_time_ms=0.0
-            ))
+            results.append(
+                ModelOutput(
+                    model_name=name,
+                    model_version="1.0.0",
+                    anomaly_score=score,
+                    anomaly_flag=anomaly_flag,
+                    contamination=self.contamination,
+                    inference_time_ms=0.0,
+                )
+            )
 
         if self.graph_detector is not None:
             graph_scores = self.graph_detector.decision_function(
                 features.select_dtypes(include=[np.number]).fillna(0)
             )
-            results.append(ModelOutput(
-                model_name="graph",
-                model_version="1.0.0",
-                anomaly_score=float(graph_scores[0]),
-                anomaly_flag=False,
-                contamination=self.contamination,
-                inference_time_ms=0.0
-            ))
+            results.append(
+                ModelOutput(
+                    model_name="graph",
+                    model_version="1.0.0",
+                    anomaly_score=float(graph_scores[0]),
+                    anomaly_flag=False,
+                    contamination=self.contamination,
+                    inference_time_ms=0.0,
+                )
+            )
 
         return results
 
@@ -121,9 +125,7 @@ class GraphAnomalyDetector:
 
     def __init__(self, contamination: float = 0.01, max_nodes: int = 100000):
         self.iforest = IForest(
-            contamination=contamination,
-            n_estimators=100,
-            random_state=42
+            contamination=contamination, n_estimators=100, random_state=42
         )
         self.G = None
         self.community_map = None
@@ -139,8 +141,9 @@ class GraphAnomalyDetector:
         self.G = nx.DiGraph()
         for _, r in df.iterrows():
             if "payer_id" in r and "payee_id" in r:
-                self.G.add_edge(r["payer_id"], r["payee_id"],
-                              weight=r.get("amount", 1.0))
+                self.G.add_edge(
+                    r["payer_id"], r["payee_id"], weight=r.get("amount", 1.0)
+                )
 
         if self.G.number_of_nodes() > 0:
             try:
@@ -157,11 +160,17 @@ class GraphAnomalyDetector:
         import networkx as nx
 
         if self.G is None or node_id not in self.G:
-            return {k: 0.0 for k in [
-                "graph_degree_centrality", "graph_pagerank",
-                "graph_in_out_ratio", "graph_fund_concentration",
-                "graph_cycle_count", "graph_community_deviation"
-            ]}
+            return {
+                k: 0.0
+                for k in [
+                    "graph_degree_centrality",
+                    "graph_pagerank",
+                    "graph_in_out_ratio",
+                    "graph_fund_concentration",
+                    "graph_cycle_count",
+                    "graph_community_deviation",
+                ]
+            }
 
         in_d = self.G.in_degree(node_id)
         out_d = self.G.out_degree(node_id)
@@ -190,7 +199,7 @@ class GraphAnomalyDetector:
             "graph_in_out_ratio": float(in_d / max(out_d, 1)),
             "graph_fund_concentration": float(out_t / (in_t + 1)),
             "graph_cycle_count": 0.0,
-            "graph_community_deviation": comm_dev
+            "graph_community_deviation": comm_dev,
         }
 
     def _comm_dev(self, nid: str, communities: list) -> float:

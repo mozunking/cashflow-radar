@@ -35,21 +35,33 @@ def main():
         "Go to",
         options=list(PAGES.keys()),
         index=0,
-        format_func=lambda x: f"📊 {x}" if x == "Dashboard" else f"📋 {x}" if x == "Review" else f"🚀 {x}" if x == "Deployment" else f"⚙️ {x}",
+        format_func=lambda x: (
+            f"📊 {x}"
+            if x == "Dashboard"
+            else (
+                f"📋 {x}"
+                if x == "Review"
+                else f"🚀 {x}" if x == "Deployment" else f"⚙️ {x}"
+            )
+        ),
     )
 
     # Route to selected page
     if selection == "Dashboard":
         from pages import dashboard
+
         dashboard.show()
     elif selection == "Review":
         from pages import review
+
         review.show()
     elif selection == "Deployment":
         from pages import deployment
+
         deployment.show()
     elif selection == "Settings":
         from pages import settings
+
         settings.show()
 
     # Footer
