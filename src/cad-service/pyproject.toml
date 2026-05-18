@@ -13,12 +13,15 @@ dependencies = [
     "pydantic>=2.0.0",
     "pandas>=2.2.0,<2.3.0",
     "numpy>=1.26.0,<2.0.0",
-    "cad-data-quality @ file:///${PROJECT_ROOT}/src/cad-data-quality",
-    "cad-feature-engine @ file:///${PROJECT_ROOT}/src/cad-feature-engine",
-    "cad-model-pool @ file:///${PROJECT_ROOT}/src/cad-model-pool",
-    "cad-fusion-engine @ file:///${PROJECT_ROOT}/src/cad-fusion-engine",
-    "cad-explainer @ file:///${PROJECT_ROOT}/src/cad-explainer",
-    "cad-degradation @ file:///${PROJECT_ROOT}/src/cad-degradation",
+    "cad-data-quality>=1.0.0",
+    "cad-feature-engine>=1.0.0",
+    "cad-model-pool>=1.0.0",
+    "cad-fusion-engine>=1.0.0",
+    "cad-explainer>=1.0.0",
+    "cad-degradation>=1.0.0",
+    "slowapi>=0.1.9,<0.2.0",
+    "python-json-logger>=0.1.11",
+    "gmssl>=3.2.0,<4.0.0",
 ]
 
 [project.optional-dependencies]

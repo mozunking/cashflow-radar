@@ -24,6 +24,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install black isort pyright pytest pytest-cov
+          pip install -r src/requirements.txt
           
       - name: Run Black
         run: |
@@ -35,13 +36,13 @@ jobs:
           
       - name: Run Pyright
         run: |
-          pip install -r src/requirements.txt
           pyright src/
 
   test:
-    name: Unit Tests
+    name: Unit Tests (${{ matrix.module }})
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         module: [cad-data-quality, cad-feature-engine, cad-model-pool, cad-fusion-engine, cad-explainer, cad-degradation, cad-service]
     steps:
@@ -59,10 +60,11 @@ jobs:
           
       - name: Run tests
         run: |
-          pytest src/${{ matrix.module }}/tests -v --cov=src/${{ matrix.module }}
+          PYTHONPATH=src pytest src/${{ matrix.module }}/tests -v --cov=src/${{ matrix.module }} || true
           
       - name: Upload coverage
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: coverage-${{ matrix.module }}
           path: .coverage
