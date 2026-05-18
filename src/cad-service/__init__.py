@@ -1,0 +1,1 @@
+"""CAD Service - FastAPI Application"""

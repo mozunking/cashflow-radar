@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  cad-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://cad:cad123@postgres:5432/cad
+      - REDIS_URL=redis://redis:6379/0
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    depends_on:
+      - postgres
+      - redis
+      - mlflow
+    networks:
+      - cad-network
+
+  cad-console:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.console
+    ports:
+      - "8501:8501"
+    environment:
+      - API_BASE_URL=http://cad-service:8000
+    depends_on:
+      - cad-service
+    networks:
+      - cad-network
+
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=cad
+      - POSTGRES_PASSWORD=cad123
+      - POSTGRES_DB=cad
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - cad-network
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    networks:
+      - cad-network
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.13.0
+    ports:
+      - "5000:5000"
+    command: mlflow server --backend-store-uri postgresql://cad:cad123@postgres:5432/mlflow --default-artifact-root minio/artifacts
+    depends_on:
+      - postgres
+      - minio
+    networks:
+      - cad-network
+
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    networks:
+      - cad-network
+
+  prometheus:
+    image: prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - cad-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+    networks:
+      - cad-network
+
+volumes:
+  postgres-data:
+  minio-data:
+
+networks:
+  cad-network:
+    driver: bridge

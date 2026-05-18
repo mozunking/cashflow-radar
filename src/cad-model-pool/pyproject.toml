@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cad-model-pool"
+version = "1.0.0"
+description = "CAD Model Pool"
+requires-python = ">=3.10"
+dependencies = [
+    "pandas>=2.2.0,<2.3.0",
+    "numpy>=1.26.0,<2.0.0",
+    "pyod>=1.1.0,<1.2.0",
+    "networkx>=3.2.0,<3.4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
