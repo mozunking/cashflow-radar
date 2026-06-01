@@ -37,7 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        module: [cad-data-quality, cad-feature-engine, cad-model-pool, cad-fusion-engine, cad-explainer, cad-degradation]
+        module: [cad_data_quality, cad_feature_engine, cad_model_pool, cad_fusion_engine, cad_explainer, cad_degradation]
     steps:
       - uses: actions/checkout@v4
       
@@ -68,7 +68,7 @@ jobs:
         with:
           context: .
           push: false
-          tags: ghcr.io/${{ github.repository }}/cad-service:${{ github.sha }}
+          tags: ghcr.io/${{ github.repository }}/cad_service:${{ github.sha }}
 
   docs:
     name: Documentation Check

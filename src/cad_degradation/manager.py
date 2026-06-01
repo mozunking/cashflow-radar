@@ -23,7 +23,7 @@ class DegradationManager:
     def __init__(self, fail_threshold: int = 3, redis_client: Any = None):
         self.level = "full"
         self.degraded: set[str] = set()
-        self.fail_count: dict[str, int] = field(default_factory=dict)
+        self.fail_count: dict[str, int] = {}
         self.fail_threshold = fail_threshold
         self.redis = redis_client
         self._lock = threading.Lock()

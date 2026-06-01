@@ -131,6 +131,9 @@ class ExplainerEngine:
 
     def _classify_anomaly(self, features: dict[str, float]) -> str:
         """根据特征贡献度确定异常类型"""
+        if not features:
+            return "TYPE_05"
+
         amount_features = ["amt_deviation", "amt_industry_dev", "amt_volatility"]
         freq_features = ["freq_daily", "freq_weekly", "freq_monthly"]
         counterparty_features = ["cp_stranger_ratio", "cp_concentration"]
